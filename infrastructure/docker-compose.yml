@@ -1,0 +1,138 @@
+version: '3.5'
+
+services:
+  
+  mysql-service:
+    image: debezium/example-mysql:1.2
+    container_name: mysql
+    networks: 
+      - kafka-net
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: debezium
+      MYSQL_USER: mysqluser
+      MYSQL_PASSWORD: mysqlpw
+    volumes:
+      - ./seed-data/movies.sql:/docker-entrypoint-initdb.d/z99_dump.sql
+
+  connect-debezium:
+    image: debezium/connect
+    container_name: debezium
+    networks: 
+      - kafka-net
+    hostname: debezium  
+    depends_on:
+      - mysql-service
+      - schema-registry
+    ports:
+      - 8083:8083
+    environment:
+      BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092
+      GROUP_ID: connect-debezium
+      CONFIG_STORAGE_TOPIC: docker-connect-debezium-configs
+      OFFSET_STORAGE_TOPIC: docker-connect-debezium-offsets
+      STATUS_STORAGE_TOPIC: docker-connect-debezium-status
+      # default value
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      # default value
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter 
+    volumes:
+      - ./mysql-streaming/scripts:/scripts
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:4.1.1
+    networks: 
+    - kafka-net     
+    hostname: zookeeper
+    container_name: zookeeper
+    ports: 
+    - "32181:32181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
+
+  kafka1:
+    image: confluentinc/cp-kafka
+    networks: 
+    - kafka-net
+    hostname: kafka1
+    container_name: broker1
+    ports: 
+    - "29092:29092"
+    depends_on:
+    - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+  kafka2:
+    image: confluentinc/cp-kafka
+    networks: 
+    - kafka-net
+    hostname: kafka2
+    container_name: broker2
+    ports: 
+    - "29093:29093"
+    depends_on:
+    - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:4.1.1
+    networks: 
+    - kafka-net
+    hostname: schema-registry
+    container_name: schema-registry
+    ports:
+    - "38081:38081"
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:32181
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:38081
+      SCHEMA_REGISTRY_DEBUG: "true"
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:latest
+    networks: 
+    - kafka-net
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - zookeeper
+      - schema-registry
+     # - ksqldb-server
+    ports:
+      - "9021:9021"
+    environment:
+      #CONTROL_CENTER_KSQL_URL: ksqldb-server:8088
+      #CONTROL_CENTER_KSQL_ADVERTISED_URL: ksqldb-server:8088
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092 
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: zookeeper:32181
+      CONTROL_CENTER_CONNECT_CLUSTERS: connect:8084,debezium:8083
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: schema-registry:38081
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021  
+     
+    
+networks:
+  kafka-net:
+    driver: bridge
