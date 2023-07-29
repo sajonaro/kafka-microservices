@@ -9,9 +9,9 @@ services:
     hostname: zookeeper
     container_name: zookeeper
     ports: 
-    - "32181:32181"
+    - ${ZOOKEEPER_CLIENT_PORT}:${ZOOKEEPER_CLIENT_PORT}
     environment:
-      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_CLIENT_PORT}
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_SYNC_LIMIT: 2  
 
@@ -27,13 +27,13 @@ services:
     - zookeeper
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_CLIENT_PORT}
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:${KAFKA_PORT}
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
   kafka2:
     image: confluentinc/cp-kafka
@@ -42,18 +42,18 @@ services:
     hostname: kafka2
     container_name: broker2
     ports: 
-    - "29093:29093"
+    - 29093:29093
     depends_on:
     - zookeeper
     environment:
       KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:32181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_CLIENT_PORT}
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:${KAFKA_PORT}
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
   mysql-service:
     image: debezium/example-mysql:1.2
@@ -61,7 +61,7 @@ services:
     networks: 
       - kafka-net
     ports:
-      - 3306:3306
+      - ${MYSQL_PORT}:${MYSQL_PORT}
     environment:
       MYSQL_ROOT_PASSWORD: debezium
       MYSQL_USER: mysqluser
@@ -76,14 +76,14 @@ services:
     hostname: schema-registry
     container_name: schema-registry
     ports:
-    - "38081:38081"
+    - ${SCHEMA_REGISTRY_PORT}:${SCHEMA_REGISTRY_PORT}
     environment:
-      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:32181
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:${ZOOKEEPER_CLIENT_PORT}
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:38081
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:${SCHEMA_REGISTRY_PORT}
       SCHEMA_REGISTRY_DEBUG: "true"
 
-  kafka-connect:
+  kafka-connect-source:
     image: debezium/connect
     container_name: debezium-connect
     networks: 
@@ -93,14 +93,13 @@ services:
       - mysql-service
       - schema-registry
     ports:
-      - 8083:8083
+      - ${DEBEZIUM_SOURCE_CONNECT_PORT}:${DEBEZIUM_SOURCE_CONNECT_PORT}
     environment:
-      BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092
+      BOOTSTRAP_SERVERS: kafka1:${KAFKA_PORT},kafka2:${KAFKA_PORT}
       GROUP_ID: 1
       CONFIG_STORAGE_TOPIC: docker-connect-debezium-configs
       OFFSET_STORAGE_TOPIC: docker-connect-debezium-offsets
       STATUS_STORAGE_TOPIC: docker-connect-debezium-status
-  # command: /scripts/submit_debezium_config.sh
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:latest
@@ -111,21 +110,35 @@ services:
     depends_on:
       - zookeeper
       - schema-registry
-     # - ksqldb-server
+      - kafka1
+      - kafka2
+      - kafka-connect-source
     ports:
-      - "9021:9021"
+      - ${CONTROL_CENTER_PORT}:${CONTROL_CENTER_PORT}
     environment:
-      #CONTROL_CENTER_KSQL_URL: ksqldb-server:8088
-      #CONTROL_CENTER_KSQL_ADVERTISED_URL: ksqldb-server:8088
-      CONTROL_CENTER_BOOTSTRAP_SERVERS: kafka1:9092,kafka2:9092 
-      CONTROL_CENTER_ZOOKEEPER_CONNECT: zookeeper:32181
-      CONTROL_CENTER_CONNECT_CLUSTERS: connect:8084,debezium:8083
-      CONTROL_CENTER_SCHEMA_REGISTRY_URL: schema-registry:38081
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: kafka1:${KAFKA_PORT},kafka2:${KAFKA_PORT} 
+      CONTROL_CENTER_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_CLIENT_PORT}
+      CONTROL_CENTER_CONNECT_CLUSTERS:  debezium:${DEBEZIUM_SOURCE_CONNECT_PORT}
+      CONTROL_CENTER_CONNECT_HEALTHCHECK_ENDPOINT: '/connectors'
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: schema-registry:${SCHEMA_REGISTRY_PORT}
       CONTROL_CENTER_REPLICATION_FACTOR: 1
       CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
-      PORT: 9021  
+      PORT: ${CONTROL_CENTER_PORT}  
+
+  sqlite:
+    image: sqlite:latest
+    networks: 
+     - kafka-net
+    container_name: sqlite
+    volumes:
+      - /data:/db/data
+    build:
+      context: ./db 
+    stdin_open: true
+    tty: true
+  
      
 networks:
   kafka-net:

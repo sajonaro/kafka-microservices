@@ -4,24 +4,18 @@ curl -i -X PUT -H "Content-Type:application/json" \
   http://localhost:8083/connectors/source-debezium/config \
   -d '{
             "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+            "tasks.max": "1",
             "database.hostname": "mysql",
             "database.port": "3306",
             "database.user": "debezium",
             "database.password": "dbz",
             "database.server.id": "42",
-            "database.server.name": "asgard",
+            "database.server.name": "42",
+            "database.include.list": "demo",
             "table.whitelist": "demo.movies",
             "database.history.kafka.bootstrap.servers": "kafka1:9092,kafka2:9092",
-            "database.history.kafka.topic": "dbhistory.demo" ,
-            "decimal.handling.mode": "double",
-            "include.schema.changes": "true",
-            "transforms": "unwrap,dropTopicPrefix",
-            "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
-            "transforms.dropTopicPrefix.type":"org.apache.kafka.connect.transforms.RegexRouter",
-            "transforms.dropTopicPrefix.regex":"asgard.demo.(.*)",
-            "transforms.dropTopicPrefix.replacement":"$1",
-            "key.converter": "io.confluent.connect.avro.AvroConverter",
-            "key.converter.schema.registry.url": "http://schema-registry:38081",
-            "value.converter": "io.confluent.connect.avro.AvroConverter",
-            "value.converter.schema.registry.url": "http://schema-registry:38081"
+            "schema.history.internal.kafka.bootstrap.servers" : "kafka1:9092,kafka2:9092",
+            "database.history.kafka.topic": "dbhistory.demo",
+            "schema.history.internal.kafka.topic" : "dbhistory.internl.demo",
+            "topic.prefix": "debezium-mysql"
     }'
