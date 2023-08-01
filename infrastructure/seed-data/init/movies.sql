@@ -1,6 +1,3 @@
-GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'replicator' IDENTIFIED BY 'replpass';
-GRANT SELECT, RELOAD, SHOW DATABASES, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'debezium' IDENTIFIED BY 'dbz';
-
 -- Create the database that we'll use to populate data and watch the effect in the binlog
 CREATE DATABASE demo;
 GRANT ALL PRIVILEGES ON demo.* TO 'mysqluser'@'%';
@@ -23,7 +20,7 @@ CREATE TABLE `movies`
     `cinematographer`      varchar(256)  NOT NULL,
     `production_companies` varchar(256)  NOT NULL,
     PRIMARY KEY (`movie_id`)
-);
+) ENGINE=INNODB;
 
 -- Inserting 919 rows into movies
 -- Insert batch #1

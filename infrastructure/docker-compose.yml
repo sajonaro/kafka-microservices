@@ -1,5 +1,14 @@
 version: '3.5'
 
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  kafka-net:
+    driver: bridge
+
 services:
   
   zookeeper:
@@ -62,6 +71,7 @@ services:
   mysql:
     image: mysql:5.7-debian
     container_name: mysql
+    restart: always
     networks: 
       - kafka-net
     ports:
@@ -71,8 +81,8 @@ services:
       MYSQL_USER: mysqluser
       MYSQL_PASSWORD: mysqlpw
     volumes:
-      - ./seed-data/movies.sql:/docker-entrypoint-initdb.d/z99_dump.sql
-      - ./seed-data/data:/var/lib/mysql
+      - ./seed-data/init:/docker-entrypoint-initdb.d
+      - ./seed-data/volume:/var/lib/mysql
       # override default settings with parameters from config-file.cnf
       - ./seed-data/etc:/etc/mysql/conf.d
 
@@ -83,7 +93,9 @@ services:
       - kafka-net  # mysql thus is available by path: mysql:3306 
     restart: always
     ports:
-      - 8080:8080
+      - ${ADMINER_PORT}:${ADMINER_PORT}
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql:${MYSQL_PORT}  
 
   schema-registry:
     image: confluentinc/cp-schema-registry:4.1.1
@@ -144,6 +156,3 @@ services:
       PORT: ${CONTROL_CENTER_PORT}  
 
      
-networks:
-  kafka-net:
-    driver: bridge
