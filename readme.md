@@ -42,3 +42,6 @@
 sudo chown $(whoami):$(whoami) /var/run/docker.sock
 
 ```
+
+
+- debezium configuration process  takes time, so it may take running ./start.sh 2 times in a row to set up debezium connector  
