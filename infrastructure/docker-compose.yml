@@ -156,3 +156,12 @@ services:
       PORT: ${CONTROL_CENTER_PORT}  
 
      
+  swagger-ui:
+   image: swaggerapi/swagger-ui
+   container_name: swagger-ui-container
+   ports:
+    - "80:8080"
+   volumes:
+    - ${PWD}://usr/share/nginx/html/api
+   environment:
+     URLS: "[{ url: \"design/api/api-def.yaml\", name: \"e-store API definitions\" }]" 
