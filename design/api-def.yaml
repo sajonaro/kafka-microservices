@@ -57,19 +57,6 @@ paths:
           description: Invalid input
 
 
-    get:
-      summary: get a list of players
-      tags:
-        - player
-      operationId: getAllplayers
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/players'
-
 components:
   schemas:
     client:

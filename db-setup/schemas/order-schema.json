@@ -1,0 +1,3 @@
+{
+    "schema": "{\"type\":\"record\",\"name\":\"Client\",\"namespace\":\"com.temp.avro.model\",\"fields\":[{\"name\":\"id\",\"type\":\"int\"},{\"name\":\"firstName\",\"type\":\"string\"},{\"name\":\"lastName\",\"type\":\"string\"}]}"
+}
