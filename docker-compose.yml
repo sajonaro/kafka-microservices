@@ -105,7 +105,7 @@ services:
       SCHEMA_REGISTRY_LISTENERS: http://schema-registry:${SCHEMA_REGISTRY_PORT}
       SCHEMA_REGISTRY_DEBUG: "true"
 
-  kafka-connect-source:
+  clients-source-connector:
     image: debezium/connect
     container_name: debezium-connect
     networks: 
@@ -134,7 +134,7 @@ services:
       - schema-registry
       - kafka1
       - kafka2
-      - kafka-connect-source
+      - clients-source-connector
     ports:
       - ${CONTROL_CENTER_PORT}:${CONTROL_CENTER_PORT}
     environment:
@@ -160,3 +160,36 @@ services:
     - ${PWD}://usr/share/nginx/html/api
    environment:
      URLS: "[{ url: \"api/design/api-def.yaml\", name: \"e-store API definitions\" }]" 
+
+
+  client-api:
+    build: 
+      context: ./services/clients
+      dockerfile: Dockerfile
+    container_name: clients-api
+    hostname: cleints-api
+    networks:
+      - kafka-net
+    ports:
+      - "4000:4000"
+    environment:
+      - HOST=clients-db
+
+  clients-database:
+    build:
+      context: ./services/clients/database
+      dockerfile: Dockerfile
+    restart: always
+    container_name: clients-db
+    hostname: clients-db
+    environment:
+      - DATABAse_HOST=127.0.0.1
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=my-strongest-password
+      - POSTGRES_DB=poc-db
+    ports:
+      - 5432:5432
+    volumes:
+      - mock_data:/var/lib/postgresql/data/
+    networks:
+      - kafka-net        
