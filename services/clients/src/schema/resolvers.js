@@ -1,6 +1,7 @@
 const {pool} = require ('../db/dbConnectionProvider')
+const {Void} = require('./scalar-void')
 
-const fetchFromDb = async (query) =>{
+const runQuery = async (query) =>{
   
   try{
     var res =  await pool.query(query);
@@ -16,15 +17,18 @@ const fetchFromDb = async (query) =>{
 const resolvers = {
   Query: {
     getClients: async () => {
-       return await fetchFromDb("select * from Clients"); 
+       return await runQuery("SELECT * FROM Clients"); 
     }
   },
 
   Mutation: {
-    setClient: async (client) => {
-       return await fetchFromDb("insert into Clients (FirstName, LastName, Phone) values ('"+client.FirstName+"','"+client.LastName+"','"+client.Phone+"')"); 
+    setClient: async ( ctx , args) => {
+       return await runQuery(`INSERT INTO Clients ("FirstName", "LastName", "Phone")
+                              VALUES ('${args.fName}', '${args.lName}', '${args.phoneNum}')`); 
     }
-  }
+  },
+
+  Void: Void
 };
 
 module.exports = { resolvers };

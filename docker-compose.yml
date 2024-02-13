@@ -4,6 +4,9 @@ networks:
   kafka-net:
     driver: bridge
 
+volumes:
+  clients_db_vol:
+
 services:
   
   zookeeper:
@@ -190,6 +193,6 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - mock_data:/var/lib/postgresql/data/
+      - clients_db_vol:/var/lib/postgresql/data/
     networks:
       - kafka-net        

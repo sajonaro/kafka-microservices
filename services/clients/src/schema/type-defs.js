@@ -1,6 +1,8 @@
 const { gql } = require('apollo-server');
 
 const typeDefs = gql`
+
+  scalar Void
   
   type Query {
     getClients: [Client]!
@@ -8,7 +10,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    setClient(client: Client): String
+    setClient(fName: String, lName: String, phoneNum: String): [String]
   }
 
   type Client {
@@ -18,7 +20,7 @@ const typeDefs = gql`
     Phone: String!
   }
 
-
+  
 `
 
 module.exports = {typeDefs}
