@@ -1,0 +1,57 @@
+version: '3.5'
+
+networks:
+  kafka-net:
+    driver: bridge
+
+volumes:
+  clients_db_vol:
+
+include: 
+  - ./compose-files/kafka-cluster.yaml
+  - ./compose-files/connector.yaml
+  - ./compose-files/microservices.yaml
+
+services:
+  
+  mysql:
+    image: mysql:5.7-debian
+    container_name: mysql
+    restart: always
+    networks: 
+      - kafka-net
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: debezium
+      MYSQL_USER: mysqluser
+      MYSQL_PASSWORD: mysqlpw
+    volumes:
+      # override default settings with parameters from config-file.cnf
+      - ./db-setup/config-file.cnf:/etc/mysql/conf.d/config-file.cnf
+      - ./db-setup:/docker-entrypoint-initdb.d
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    networks: 
+      - kafka-net  # mysql thus is available by path: mysql:3306 
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql:3306
+
+  swagger-ui:
+   image: swaggerapi/swagger-ui
+   container_name: swagger-ui-container
+   ports:
+    - "80:8080"
+   networks: 
+    - kafka-net
+   volumes:
+    - ${PWD}://usr/share/nginx/html/api
+   environment:
+     URLS: "[{ url: \"api/design/api-def.yaml\", name: \"e-store API definitions\" }
+             { url: \"api/kafka-connect/connect-api-def.yaml\", name: \"debezium-connect API definitions\" }
+             { url: \"api/kafka-connect/kafka-api-def.yaml\", name: \"kafka brokers API definition\" }]" 

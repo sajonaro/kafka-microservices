@@ -3,3 +3,4 @@ todo
 .calva/*
 .*
 node_modules
+*.gz
