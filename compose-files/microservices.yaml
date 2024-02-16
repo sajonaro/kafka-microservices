@@ -33,7 +33,7 @@ services:
     container_name: clients-db
     hostname: clients-db
     environment:
-      - DATABAse_HOST=127.0.0.1
+      - DATABASE_HOST=127.0.0.1
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=my-strongest-password
       - POSTGRES_DB=poc-db

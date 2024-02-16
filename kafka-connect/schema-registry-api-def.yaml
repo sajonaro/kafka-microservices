@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: E-store API
+  title: kafka connect API
   description: |-
     defined using Open API and swagger-editor tool
   version: 0.0.1
@@ -8,84 +8,26 @@ externalDocs:
   description: find out more about swagger.io
   url: http://swagger.io
 servers:
-  - name: kafka cluster
-    url: http://localhost:8001
+  - name: schema registry api
+    url: http://localhost:38081
+    description: schema registry api
 paths:
-  /consumer:
+  /subjects:
     description: |
-      check health of consumer
+      get registered subjects
     get:
+      summary: get a list of subjects
       tags:
-        - consumer
-      operationId: checkHealthConsumers
+        - subjects
+      operationId: getSubjects
       responses:
         '200':
           description: success
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/health-status'
-  /consumer/orders:
-    get:
-      tags:
-        - orders
-      summary: get unprocessed orders
-      operationId: getOrders
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/orders'
-        '405':
-          description: Invalid input
-
-  /producer:
-    description: |
-      check health of producer
-    get:
-      tags:
-        - producer
-      operationId: checkHealthProducers
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/health-status'
-  /producer/orders:              
-    post:
-      tags:
-        - orders
-      summary: produce new order
-      operationId: producerOrder
-      requestBody:
-        description: produce new order
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/order'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/order'          
-        '405':
-          description: Invalid input
 
 components:
   schemas:
-    health-status:
-      required:
-        - message
-      type: object
-      properties:
-        message:
-          type: string
     client:
       required:
         - id

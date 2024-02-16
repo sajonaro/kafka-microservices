@@ -12,131 +12,98 @@ servers:
     url: http://localhost:8083
     description: kafka connect service
 paths:
-  /client:
+  /connector-plugins:
     description: |
-      Clients service
-    servers:
-      - url: http://localhost:4041/api/v1  
+      get registered connectors
     get:
-      summary: get a list of clients
+      summary: get a list of connectors
       tags:
-        - clients
-      operationId: getAllClients
+        - connectors
+      operationId: getConnectors
       responses:
         '200':
           description: success
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/clients'
+  /connectors:
+    description: |
+      configure connectors
     post:
+      summary: provide connector for db via config object 
       tags:
-        - clients
-      summary: create new client
-      operationId: createClient
+        - connectors
+      operationId: postConnector
       requestBody:
-        description: Create a new client
+        description: Create/register new connector
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/client'
+              $ref: '#/components/schemas/connector
       responses:
         '200':
-          description: Successful operation
+          description: success
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/client'          
-        '405':
-          description: Invalid input
+
+# POST  http://localhost:8083/connectors --> To register the kafka connector
+# {
+#   "name": "inventory-connector",
+#   "config": {
+#     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+#     "database.hostname": "postgres",
+#     "database.port": "5432",
+#     "database.user": "postgres",
+#     "database.password": "postgres",
+#     "database.dbname" : "postgres",
+#     "database.server.name": "dbserver1",
+#     "table.include.list": "inventory.customers"
+#
+#   }
+# }   
 
 
 components:
   schemas:
-    client:
+    connector:
       required:
-        - id
-        - firstName
-        - lastName
+        - name
+        - config
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-          example: 10
-        firstName:
+        name:
           type: string
-          example: joe
-        lastName:
-          type: string
-          example: Schmoe  
-    clients:
-      type: array
-      items:
-        $ref: '#/components/schemas/client'
-    product:
-      required:
-        - id
-        - description
-        - title
-        - price
+          example: "inventory-connector"
+        config:
+          type: object
+          $ref: '#/components/schemas/config'
+    config:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-          example: 10
-        title:
+        connector.class:
           type: string
-          example: "toshiba XYZ"  
-        description:
+          example: "io.debezium.connector.postgresql.PostgresConnector"
+        database.hostname:
           type: string
-          example: "laptop computer"
-        price:
-          type: float
-          example: 100.5  
-    products:
-      type: array
-      items:
-        $ref: '#/components/schemas/product'    
-    order:
-      required:
-        - id
-        - clientId
-        - productId
-        - quantity
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 10
-        clientId:
-          type: integer
-          format: int64
-          example: 10
-        productId:
-          type: integer
-          format: int64
-          example: 10
-        quantity:
-          type: integer
-          format: int64
-          example: 10
-    orders:
-      type: array
-      items:
-        $ref: '#/components/schemas/order'
+          example: "postgres"
+        database.port:
+          type: string
+          example: "5432"
+        database.user:
+          type: string
+          example: "postgres"
+        database.password:
+          type: string
+          example: "postgres"
+        database.dbname:
+          type: string
+          example: "postgres"
+        database.server.name:
+          type: string
+          example: "dbserver1"
+        table.include.list:
+          type: string
+          example: "inventory.customers" 
 
-    error:
-      type: object
-      properties:
-        code:
-          type: integer
-          format: int32
-          example: 500
-        message:
-          type: string
-          example: "internal error"
+# POST  http://localhost:8083/connectors --> To register the kafka connector
   
 
