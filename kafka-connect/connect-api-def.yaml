@@ -12,22 +12,19 @@ servers:
     url: http://localhost:8083
     description: kafka connect service
 paths:
-  /connector-plugins:
+  /connectors:
     description: |
-      get registered connectors
+      get/register connectors
     get:
       summary: get a list of connectors
       tags:
         - connectors
       operationId: getConnectors
+      produces:
+        - application/json
       responses:
-        '200':
-          description: success
-          content:
-            application/json:
-  /connectors:
-    description: |
-      configure connectors
+        200:
+          description: OK
     post:
       summary: provide connector for db via config object 
       tags:
@@ -38,29 +35,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/connector
+              $ref: '#/components/schemas/connector'
+      produces:
+        - application/json
       responses:
-        '200':
-          description: success
-          content:
-            application/json:
-
-# POST  http://localhost:8083/connectors --> To register the kafka connector
-# {
-#   "name": "inventory-connector",
-#   "config": {
-#     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
-#     "database.hostname": "postgres",
-#     "database.port": "5432",
-#     "database.user": "postgres",
-#     "database.password": "postgres",
-#     "database.dbname" : "postgres",
-#     "database.server.name": "dbserver1",
-#     "table.include.list": "inventory.customers"
-#
-#   }
-# }   
-
+        200:
+          description: OK
 
 components:
   schemas:
@@ -72,7 +52,7 @@ components:
       properties:
         name:
           type: string
-          example: "inventory-connector"
+          example: "clients-source-connector"
         config:
           type: object
           $ref: '#/components/schemas/config'
@@ -84,26 +64,28 @@ components:
           example: "io.debezium.connector.postgresql.PostgresConnector"
         database.hostname:
           type: string
-          example: "postgres"
+          example: "clients-db"
         database.port:
           type: string
           example: "5432"
         database.user:
           type: string
-          example: "postgres"
+          example: "postgres-user"
         database.password:
           type: string
-          example: "postgres"
+          example: "my-strongest-password"
         database.dbname:
           type: string
-          example: "postgres"
+          example: "clients-db"
         database.server.name:
           type: string
-          example: "dbserver1"
+          example: "clients-db"
         table.include.list:
           type: string
-          example: "inventory.customers" 
-
-# POST  http://localhost:8083/connectors --> To register the kafka connector
-  
-
+          example: "public.inventory"
+        topic.prefix:
+          type: string
+          example: "clients"
+        plugin.name:
+          type: string
+          example: "pgoutput"     

@@ -12,7 +12,7 @@ services:
   
   client-api:
     build: 
-      context: ./services/clients
+      context: ../services/clients
       dockerfile: Dockerfile
     container_name: clients-api
     hostname: cleints-api
@@ -26,20 +26,23 @@ services:
       - clients-database  
 
   clients-database:
-    build:
-      context: ./services/clients/database
+    build: 
+      context: ../services/clients/database
       dockerfile: Dockerfile
     restart: always
     container_name: clients-db
     hostname: clients-db
     environment:
-      - DATABASE_HOST=127.0.0.1
-      - POSTGRES_USER=postgres
+      - POSTGRES_USER=postgres-user
       - POSTGRES_PASSWORD=my-strongest-password
-      - POSTGRES_DB=poc-db
+      - POSTGRES_DB=clients-db
+      - PGDATA=/var/lib/postgresql/data/
     ports:
       - 5432:5432
     volumes:
       - clients_db_vol:/var/lib/postgresql/data/
     networks:
       - kafka-net
+   
+
+

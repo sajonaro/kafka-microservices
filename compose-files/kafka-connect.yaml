@@ -1,0 +1,47 @@
+version: '3.5'
+
+networks:
+  kafka-net:
+    driver: bridge
+
+volumes:
+  clients_db_vol:
+
+include: 
+  - ./kafka-cluster.yaml
+
+services:
+  
+  schema-registry:
+    image: confluentinc/cp-schema-registry:4.1.1
+    networks: 
+      - kafka-net
+    hostname: schema-registry
+    container_name: schema-registry
+    ports:
+    - "38081:38081"
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "PLAINTEXT://kafka1:29092,PLAINTEXT://kafka2:29093"
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://schema-registry:38081
+      SCHEMA_REGISTRY_DEBUG: "true"
+  
+
+  kafka-connect:
+    image: debezium/connect:2.5.1.Final
+    container_name: kafka-connect-service
+    networks: 
+      - kafka-net
+    hostname: kafka-connect-service  
+    depends_on:
+      - clients-database
+      - schema-registry
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka1:29092,kafka2:29093
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: docker-connect-debezium-configs
+      OFFSET_STORAGE_TOPIC: docker-connect-debezium-offsets
+      STATUS_STORAGE_TOPIC: docker-connect-debezium-status
+            

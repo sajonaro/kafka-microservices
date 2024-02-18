@@ -8,23 +8,25 @@ services:
   
   zookeeper:
     image: wurstmeister/zookeeper:latest
+    hostname: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - 2181:2181
-      - 2888:2888
-      - 3888:3888
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
     networks:
       - kafka-net
 
   kafka1:
     image: wurstmeister/kafka:latest
     restart: "no"
+    hostname: kafka1
     links:
       - zookeeper
     ports:
-      - 9092:9092
+      - "9092:9092"
     networks:
       - kafka-net  
     environment:
@@ -41,8 +43,9 @@ services:
     restart: "no"
     links:
       - zookeeper
+    hostname: kafka2  
     ports:
-      - 9093:9093
+      - "9093:9093"
     networks:
       - kafka-net    
     environment:
@@ -66,3 +69,30 @@ services:
     depends_on:
       - kafka1
       - kafka2
+
+
+  #control-center:
+  #  image: confluentinc/cp-enterprise-control-center:latest
+  #  networks: 
+  #    - kafka-net
+  #  hostname: control-center
+  #  container_name: control-center
+  #  depends_on:
+  #    - zookeeper
+  #    - schema-registry
+  #    - kafka1
+  #    - kafka2
+  #    - kafka-connect
+  #  ports:
+  #    - "9021:9021"
+  #  environment:
+  #    CONTROL_CENTER_BOOTSTRAP_SERVERS: kafka1:29092,kafka2:29093 
+  #    CONTROL_CENTER_ZOOKEEPER_CONNECT: zookeeper:2181
+  #    CONTROL_CENTER_CONNECT_CLUSTERS:  debezium:8083
+  #    CONTROL_CENTER_CONNECT_HEALTHCHECK_ENDPOINT: '/connectors'
+  #    CONTROL_CENTER_SCHEMA_REGISTRY_URL: schema-registry:38081
+  #    CONTROL_CENTER_REPLICATION_FACTOR: 1
+  #    CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+  #    CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+  #    CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+  #    PORT: 9021    
