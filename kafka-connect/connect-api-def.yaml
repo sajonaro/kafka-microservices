@@ -70,7 +70,7 @@ components:
           example: "5432"
         database.user:
           type: string
-          example: "postgres-user"
+          example: "postgres"
         database.password:
           type: string
           example: "my-strongest-password"
@@ -80,12 +80,20 @@ components:
         database.server.name:
           type: string
           example: "clients-db"
-        table.include.list:
-          type: string
-          example: "public.inventory"
+        #https://debezium.io/documentation/reference/stable/connectors/postgresql.html#postgresql-property-table-include-list
+        #table.include.list:
+        #  type: string
+        #  example: "public.clients"
         topic.prefix:
           type: string
           example: "clients"
+        snapshot.mode:
+          type: string
+          example: "always"
+        #https://debezium.io/documentation/reference/stable/connectors/postgresql.html#postgresql-publication-autocreate-mode  
+        publication.autocreate.mode:
+          type: string
+          example: "all_tables" 
         plugin.name:
           type: string
-          example: "pgoutput"     
+          example: "pgoutput"      

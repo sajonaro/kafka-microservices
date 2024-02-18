@@ -4,7 +4,7 @@
           "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
           "database.hostname": "clients-db",
           "database.port": "5432",
-          "database.user": "postgres-user",
+          "database.user": "postgres",
           "database.password": "my-strongest-password",
           "database.dbname" : "clients-db",
           "database.server.name": "clients-db",
