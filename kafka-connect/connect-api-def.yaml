@@ -97,3 +97,15 @@ components:
         plugin.name:
           type: string
           example: "pgoutput"      
+        key.converter: 
+          type: string
+          example: "io.confluent.connect.avro.AvroConverter"
+        key.converter.schema.registry.url:
+          type: string
+          example: "http://localhost:38081"
+        value.converter:
+          type: string
+          example: "io.confluent.connect.avro.AvroConverter"
+        value.converter.schema.registry.url:
+          type: string 
+          example: "http://localhost:38081"

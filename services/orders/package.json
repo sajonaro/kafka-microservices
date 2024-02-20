@@ -1,0 +1,25 @@
+{
+    "name": "Clients API server",
+    "version": "1.0.0",
+    "description": "clients microservice",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "nodemon src/index"
+    },
+    "dependencies": {
+        "@apollo/federation": "^0.38.1",
+        "@apollo/server": "^4.0.0",
+        "@apollo/subgraph": "^2.6.2",
+        "@graphql-tools/mock": "^8.7.6",
+        "@graphql-tools/schema": "^9.0.4",
+        "apollo-server": "^3.12.1",
+        "graphql": "^16.6.0",
+        "graphql-scalars": "^1.22.4",
+        "graphql-tag": "^2.12.6",
+        "pg": "^8.11.3"
+    },
+    "devDependencies": {
+        "dotenv": "^16.0.0",
+        "nodemon": "^2.0.20"
+    }
+}
