@@ -44,13 +44,6 @@ localhost:8081
 ```
 
 
-
-
-### Configuration details:
-- .env contains ports used by services to communicate with each other
-- seed-data/etc/config-file.cnf file contains essential mysql server side properties to enable kafka connect (based on debezium) 
-
-
 ### Prerequisites
 - docker compose
 - jc

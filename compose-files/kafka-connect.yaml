@@ -4,9 +4,6 @@ networks:
   kafka-net:
     driver: bridge
 
-volumes:
-  clients_db_vol:
-
 include: 
   - ./kafka-cluster.yaml
 
@@ -34,7 +31,6 @@ services:
       - kafka-net
     hostname: kafka-connect-service  
     depends_on:
-      - clients-database
       - schema-registry
     ports:
       - "8083:8083"

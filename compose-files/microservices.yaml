@@ -6,6 +6,7 @@ networks:
 
 volumes:
   clients_db_vol:
+  products_db_vol:
 
 
 services:
@@ -44,5 +45,40 @@ services:
     networks:
       - kafka-net
    
+  products-api:
+    build: 
+      context: ../services/products
+      dockerfile: Dockerfile
+    container_name: products-api
+    hostname: orders-api
+    networks:
+      - kafka-net
+    ports:
+      - "4001:4001"
+    environment:
+      - HOST=products-db
+      - PORT=4001
+    depends_on:
+      - products-database  
 
+  products-database:
+    build: 
+      context: ../services/products/database
+      dockerfile: Dockerfile
+    restart: always
+    container_name: products-db
+    hostname: products-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=my-strongest-password
+      - POSTGRES_DB=products-db
+      - PGDATA=/var/lib/postgresql/data/
+    ports:
+      #N.B. The port 5433 is mapped to 5432 to avoid conflicts with the clients-database
+      # the URL via Adminer tool will be still on port 5432: i.e. products_db:5432  
+      - 5433:5432
+    volumes:
+      - products_db_vol:/var/lib/postgresql/data/
+    networks:
+      - kafka-net
 

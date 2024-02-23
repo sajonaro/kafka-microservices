@@ -16,14 +16,14 @@ const runQuery = async (query) =>{
 
 const resolvers = {
   Query: {
-    getOrders: async () => {
-       return await runQuery("SELECT * FROM Orders"); 
+    getProducts: async () => {
+       return await runQuery("SELECT * FROM Products"); 
     }
   },
 
   Mutation: {
-    setOrder: async ( ctx , args) => {
-       return await runQuery(`INSERT INTO Orders ("Name", "Description", "Price", "Currency")
+    setProduct: async ( ctx , args) => {
+       return await runQuery(`INSERT INTO Products ("Name", "Description", "Price", "Currency")
         VALUES ('${args.name}', '${args.description}', '${args.price}', '${args.currency}')`);
     }
   },

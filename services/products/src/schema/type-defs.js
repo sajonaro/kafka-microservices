@@ -5,15 +5,15 @@ const typeDefs = gql`
   scalar Void
   
   type Query {
-    getOrders: [Order]!
+    getProducts: [Product]!
     
   }
 
   type Mutation {
-    setOrder(Name: String, Description: String, Price: String, Currency: String): [String]
+    setProduct(Name: String, Description: String, Price: String, Currency: String): [String]
   }
 
-  type Order {
+  type Product {
     Id: ID!
     Name: String!
     Description: String!

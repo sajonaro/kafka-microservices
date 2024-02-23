@@ -4,7 +4,7 @@
    host:  process.env.HOST, 
    user: "postgres",
    password: "my-strongest-password",
-   database: "orders-db" ,
+   database: "products-db" ,
    port: 5432
 
 });
