@@ -1,0 +1,111 @@
+openapi: 3.0.3
+info:
+  title: kafka connect API
+  description: |-
+    defined using Open API and swagger-editor tool
+  version: 0.0.1
+externalDocs:
+  description: find out more about swagger.io
+  url: http://swagger.io
+servers:
+  - name: connect-api
+    url: http://localhost:8083
+    description: kafka connect service
+paths:
+  /connectors:
+    description: |
+      get/register connectors
+    get:
+      summary: get a list of connectors
+      tags:
+        - connectors
+      operationId: getConnectors
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+    post:
+      summary: provide connector for db via config object 
+      tags:
+        - connectors
+      operationId: postConnector
+      requestBody:
+        description: Create/register new connector
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/connector'
+      produces:
+        - application/json
+      responses:
+        200:
+          description: OK
+
+components:
+  schemas:
+    connector:
+      required:
+        - name
+        - config
+      type: object
+      properties:
+        name:
+          type: string
+          example: "clients-source-connector"
+        config:
+          type: object
+          $ref: '#/components/schemas/config'
+    config:
+      type: object
+      properties:
+        connector.class:
+          type: string
+          example: "io.debezium.connector.postgresql.PostgresConnector"
+        database.hostname:
+          type: string
+          example: "clients-db"
+        database.port:
+          type: string
+          example: "5432"
+        database.user:
+          type: string
+          example: "postgres"
+        database.password:
+          type: string
+          example: "my-strongest-password"
+        database.dbname:
+          type: string
+          example: "clients-db"
+        database.server.name:
+          type: string
+          example: "clients-db"
+        #https://debezium.io/documentation/reference/stable/connectors/postgresql.html#postgresql-property-table-include-list
+        #table.include.list:
+        #  type: string
+        #  example: "public.clients"
+        topic.prefix:
+          type: string
+          example: "clients"
+        snapshot.mode:
+          type: string
+          example: "always"
+        #https://debezium.io/documentation/reference/stable/connectors/postgresql.html#postgresql-publication-autocreate-mode  
+        publication.autocreate.mode:
+          type: string
+          example: "all_tables" 
+        plugin.name:
+          type: string
+          example: "pgoutput"      
+        key.converter: 
+          type: string
+          example: "io.confluent.connect.avro.AvroConverter"
+        key.converter.schema.registry.url:
+          type: string
+          example: "http://localhost:38081"
+        value.converter:
+          type: string
+          example: "io.confluent.connect.avro.AvroConverter"
+        value.converter.schema.registry.url:
+          type: string 
+          example: "http://localhost:38081"

@@ -36,5 +36,6 @@ services:
     - ${PWD}://usr/share/nginx/html/api
    environment:
      URLS: "[{ url: \"api/design/api-def.yaml\", name: \"e-store API definitions\" },
-             { url: \"api/kafka-connect/connect-api-def.yaml\", name: \"debezium-connect API definitions\" },
+             { url: \"api/kafka-connect/connect-api-def-source.yaml\", name: \"debezium-connect-source API definitions\" },
+             { url: \"api/kafka-connect/connect-api-def-sink.yaml\", name: \"debezium-connect-sink API definitions\" },
              { url: \"api/kafka-connect/schema-registry-api-def.yaml\", name: \"schema registry API definition\" }]" 
